@@ -1,6 +1,9 @@
 <%- include('parts/html_head') %>
 <div class="container">
-    <%- include('parts/navbar') %>
-<h2><%= name %></h2>
+<%- include('parts/navbar') %>
+
+<%= JSON.stringify(query)%>
+
+
 </div>
 <%- include('parts/html_foot') %>

@@ -1,0 +1,25 @@
+<%- include('parts/html_head') %>
+<div class="container">
+    <%- include('parts/navbar') %>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">編號</th>
+                <th scope="col">年齡</th>
+                <th scope="col">姓名</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(let i=0; i<sales.length; i++){ %>
+            <%# for(let item of sales){ %>
+                <!-- 如果換成上方for(let item of sales)，下方tr裡的sales[i]，要改成item -->
+            <tr>
+                <td><%= sales[i].id %></td>
+                <td><%= sales[i].age %></td>
+                <td><%= sales[i].name %></td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+<%- include('parts/html_foot') %>
