@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="./lib/jquery-3.4.1.js"></script>
+</head>
+
+<body>
+    <button id="p">push</button>
+
+
+    <script>
+        const p = $('#p');
+        let i = 1;
+        p.click(function () {
+            i++;
+            history.pushState(
+                {i: i}, +i, '/page' + i);
+        });
+        window.onpopstate = function () {
+            console.log(history.state);
+        };
+        //onpopstate抓歷史參數{i: i}來。
+    </script>
+    <!-- pushState() 取用三個參數：一個 state 物件、title（目前忽略）與 URL（可選用）。 -->
+
+    <!-- https://developer.mozilla.org/zh-TW/docs/Web/API/History_API -->
+</body>
+
+</html>

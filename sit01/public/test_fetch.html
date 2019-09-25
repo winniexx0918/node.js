@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id="info"></div>
+    <button>click</button>
+
+    <script src="/lib/jquery-3.4.1.js"></script>
+    <script>
+        $('button').click(function(){
+            const obj ={
+                name :'winnie',
+                age :20
+            };   //設定一個物件
+            fetch('/try-post-form2',{
+                body : JSON.stringify(obj),
+                headers : {
+                    'content-type':'application/json'
+                },
+                method : 'POST'
+            }) //fetch的方法設定
+            .then(response=>{
+                return response.json();
+            })  //以json回傳回應
+            .then(obj=>{
+                $('#info').text(JSON.stringify(obj))
+            }); //塞到你想放的位置，設定要轉出的格式，如:text(JSON.stringify(obj))，obj就是上方const obj。
+        });
+    
+    </script>
+
+</body>
+</html>
