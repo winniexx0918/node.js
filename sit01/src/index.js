@@ -11,7 +11,7 @@ const mysql = require('mysql');
 const db = mysql.createConnection({   //資料庫連線設定
     host:'35.201.219.20',
     user:'skier',
-    password:'',
+    password:' ',
     database:'SKI'
     // host:'localhost',
     // user:'winnie',
