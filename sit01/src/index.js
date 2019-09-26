@@ -5,6 +5,21 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({dest:'tmp_uploads/'});
 const fs = require('fs');
+const session = require('express-session');
+const moment = require('moment-timezone');
+const mysql = require('mysql');
+const db = mysql.createConnection({   //資料庫連線設定
+    host:'35.201.219.20',
+    user:'skier',
+    password:'XmpP8u42',
+    database:'SKI'
+    // host:'localhost',
+    // user:'winnie',
+    // password:'admin',
+    // database:'test',
+});
+db.connect();   //資料庫連線
+
 
 
 const urlencodedParser = bodyParser.urlencoded({extended:false});
@@ -14,6 +29,17 @@ app.use(bodyParser.json());
 
 ///////////////////////////// [ 靜態內容資料夾 ] 開發步驟一
 app.use(express.static('public'));
+
+///////////////////////////// session
+app.use(session({
+    saveUninitialized:false,
+    resave:false,
+    secret:'fsdgfdsfdsf',
+    cookie:{
+        maxAge:1200000,
+    }
+}))
+
 
 
 app.set('view engine', 'ejs');
@@ -150,6 +176,53 @@ app.use('/123',require(__dirname +'/admins/admin3'));
 
 app.use('/admin3-1', require(__dirname + '/admins/admin3-1') );
 
+
+/////////////////////////////顯示刷新頁面次數express-session
+app.get('/try-session', (req, res)=>{
+    req.session.my_views = req.session.my_views || 0;
+    req.session.my_views++;
+
+    res.json({
+        aa: 'hello',
+        'my views': req.session.my_views
+    });
+});
+
+/////////////////////////////moment-timezone時間設定
+
+app.get('/try-moment',(req, res)=>{
+    const myFormat = 'YYYY-MM-DD HH:mm:ss';
+    const exp = req.session.cookie.expires;
+    const mo1 = moment(exp);
+    const mo2 = moment(new Date());
+    res.contentType('text/plain');
+    res.write(mo1.toString() + "\n");
+    res.write(new Date() + "\n");
+    res.write(mo1.format(myFormat)+"\n");
+    res.write(mo2.format(myFormat)+"\n");
+    res.write(mo1.constructor.name + "\n");
+    res.write('倫敦'+ mo1.tz('Europe/London').format(myFormat) + "\n");
+    res.write('日本'+mo2.tz('Asia/Tokyo').format(myFormat) + "\n");
+    res.end('');
+});
+
+/////////////////////////////資料庫連線
+app.get('/test_datebook_try_db',(req,res)=>{
+    const sql = "SELECT * FROM `MGNT_ADMIN` LIMIT 0, 5";
+    db.query(sql, (error, results, fields)=>{
+        console.log(error);
+        console.log(results);
+        console.log(fields);
+        // res.json(results);
+
+        for(let r of results){
+            r.create_time2 = moment(r.create_time).format('YYYY-MM-DD');
+        }
+        res.render('test_datebook_try_db',{
+            rows: results
+        });
+    });
+})
 
 /////////////////////////////自訂404頁面
 app.use((req,res)=>{

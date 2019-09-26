@@ -1,0 +1,23 @@
+<%- include('parts/html_head') %>
+<div class="container">
+<%- include('parts/navbar') %>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">status</th>
+                    <th scope="col">create_time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let r of rows){ %>
+                <tr>
+                    <td><%= r.id %></td>
+                    <td><%= r.status %></td>
+                    <td><%= r.create_time2 %></td> 
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+</div>
+<%- include('parts/html_foot') %>
