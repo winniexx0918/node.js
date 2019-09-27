@@ -8,10 +8,12 @@ const fs = require('fs');
 const session = require('express-session');
 const moment = require('moment-timezone');
 const mysql = require('mysql');
+const bluebird = require('bluebird');
+const cors =require('cors');
 const db = mysql.createConnection({   //資料庫連線設定
     host:'35.201.219.20',
     user:'skier',
-    password:' ',
+    password:'XmpP8u42',
     database:'SKI'
     // host:'localhost',
     // user:'winnie',
@@ -19,6 +21,9 @@ const db = mysql.createConnection({   //資料庫連線設定
     // database:'test',
 });
 db.connect();   //資料庫連線
+
+
+bluebird.promisifyAll(db);
 
 
 
@@ -29,6 +34,12 @@ app.use(bodyParser.json());
 
 ///////////////////////////// [ 靜態內容資料夾 ] 開發步驟一
 app.use(express.static('public'));
+
+
+/////////////////////////////cors，允許所有server都可以拿到資料
+app.use(cors());
+
+
 
 ///////////////////////////// session
 app.use(session({
@@ -207,9 +218,9 @@ app.get('/try-moment',(req, res)=>{
 });
 
 /////////////////////////////資料庫連線
-app.get('/test_datebook_try_db',(req,res)=>{
-    const sql = "SELECT * FROM `MGNT_ADMIN` LIMIT 0, 5";
-    db.query(sql, (error, results, fields)=>{
+app.get('/test_ski_try_db',(req,res)=>{
+    const sql = "SELECT * FROM `MGNT_VENDOR`  WHERE `name` LIKE ?";
+    db.query(sql, ["%小明%"] ,(error, results, fields)=>{
         console.log(error);
         console.log(results);
         console.log(fields);
@@ -218,11 +229,43 @@ app.get('/test_datebook_try_db',(req,res)=>{
         for(let r of results){
             r.create_time2 = moment(r.create_time).format('YYYY-MM-DD');
         }
-        res.render('test_datebook_try_db',{
+        res.render('test_ski_try_db',{
             rows: results
         });
     });
 })
+
+
+/////////////////////////////資料庫連線，換頁
+app.get('/test_ski_try_db2/:page?',(req,res)=>{
+    let page = req.params.page || 1;
+    let perPage = 5;
+    const output = {};
+
+    db.queryAsync("SELECT COUNT(1) total FROM `MGNT_SKI_TICKETS`")
+    .then(results=>{
+        // res.json(results);
+        output.total = results[0].total;
+        return db.queryAsync(`SELECT * FROM MGNT_SKI_TICKETS LIMIT ${(page-1)*perPage},${perPage}`);
+    })
+    .then(results=>{
+        output.rows = results;
+        res.json(output);
+    })
+    .catch(error=>{
+        console.log(error);
+        res.send(error);
+    });
+});
+
+/////////////////////////////9/27資料庫連線，cookies和session使用whitelist(白名單)，準備後端服務。
+app.get('/test_session2',(req,res)=>{
+    req.session.views = req.session.views || 0;
+    req.session.views ++;
+    res.json({
+        views:req.session.views
+    })
+});
 
 /////////////////////////////自訂404頁面
 app.use((req,res)=>{
