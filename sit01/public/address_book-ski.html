@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./bootstrap/css/bootstrap.css">
+    <script src="./lib/jquery-3.4.1.js"></script>
+    <script src="./lib/lodash.js"></script>
+    <script src="./bootstrap/js/bootstrap.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div>
+        <form class="form-inline my-2 my-lg-0" onsubmit="return false;">
+            <input class="form-control mr-sm-2" type="search" id="search-input" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="button" id="search-btn">Search</button>
+        </form>
+    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+        </ul>
+    </nav>
+
+    <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">姓名</th>
+            <th scope="col">電子郵箱</th>
+            <th scope="col">手機</th>
+            <th scope="col">生日</th>
+            <th scope="col">地址</th>
+        </tr>
+        </thead>
+        <tbody id="t_content">
+        <tr>
+            <!-- <td>154</td>
+            <td>林林七87</td>
+            <td>sss@gmail.com</td>
+            <td>0999991233</td>
+            <td>1997-05-05</td>
+            <td>高雄市</td> -->
+        </tr>
+
+
+
+
+        </tbody>
+    </table>
+
+
+</div>
+
+<script>
+    const pagination = $('.pagination');
+    const t_content = $('#t_content');
+    const pagination_str = `
+            <li class="page-item <%= active %>">
+                <a class="page-link" href="#/<%= i %>/<%= keyword %>"><%= i %></a>
+            </li>
+        `;
+    const table_row_str = `
+        <tr>
+                <td><%- sid %></td>
+                <td><%- name %></td>
+                <td><%- rate %></td>
+                <td><%- type %></td>
+                <td><%- ticket %></td>
+                <td><%- description %></td>
+            </tr>
+        `;
+
+    const pagination_fn = _.template(pagination_str);
+    const table_row_fn = _.template(table_row_str);
+    let ori_data;
+    let ori_keyword = '';
+
+    const myHashChange = function () {
+        console.log(location.hash);
+        let hash = location.hash.slice(2);
+        let hash_ar = hash.split('/');
+        let page, keyword;
+        if(hash_ar[0]){
+            page = parseInt(hash_ar[0]);
+        }
+        if(hash_ar[1]){
+            keyword = hash_ar[1];
+            ori_keyword = keyword;
+        } else {
+            ori_keyword = '';
+        }
+        console.log({page, keyword});
+        let url = `/address_book-ski`;
+        if(page){
+            url += `/${page}`;
+            if(keyword){
+                url += `/${keyword}`;
+            }
+        }
+        console.log(url);
+        fetch(url)
+            .then(response=>{
+                return response.json();
+            })
+            .then(obj=>{
+                pagination.html('');
+                t_content.html('');
+
+                ori_data = obj;
+
+                for(let i=1; i<=obj.totalPage; i++){
+                    let active = i===obj.page ? 'active' : '';
+                    pagination.append( pagination_fn({
+                        i:i,
+                        active:active,
+                        keyword: ori_keyword
+                    }) );
+                }
+
+                for(let item of obj.rows){
+                    t_content.append(table_row_fn(item));
+                }
+
+                $('#search-input').val(obj.params.keyword);
+            })
+    };
+
+    window.addEventListener('hashchange', myHashChange);
+    myHashChange();
+
+    $('#search-btn').click(function(){
+        let search = $('#search-input').val();
+
+        location.href = '#/1/' + search;
+
+    });
+</script>
+
+</body>
+</html>
