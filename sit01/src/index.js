@@ -27,7 +27,8 @@ bluebird.promisifyAll(db);
 
 
 
-const urlencodedParser = bodyParser.urlencoded({extended:false});
+// const urlencodedParser = bodyParser.urlencoded({extended:false}); 
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -36,8 +37,27 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 
-/////////////////////////////cors，允許所有server都可以拿到資料
-app.use(cors());
+/////////////////////////////cors，允許所有server都可以拿到資料  10/1註
+// app.use(cors());     
+
+
+
+///////////////////////////// 10/1 whitelist,上方cors先註掉
+const whitelist = ['http://localhost:5000', 'http://localhost:8080','http://localhost:3000',undefined];
+const corsOptions = {
+    credentials: true,
+    origin: function(origin, callback){
+        // console.log('origin: ' + origin);
+
+        if(whitelist.indexOf(origin)>=0){
+            callback(null, true); //允許
+        } else {
+            // callback(new Error('EEEEEEEEError'));
+             callback(null, false); //不允許
+        }
+    }
+};
+app.use(cors(corsOptions));
 
 
 
@@ -95,8 +115,10 @@ app.get('/try-qs',(req,res)=>{
 app.get('/try-post-form',(req,res)=>{
     res.render('try-post-form');
 })
-app.post('/try-post-form',urlencodedParser,(req,res)=>{
+app.post('/try-post-form',(req,res)=>{
     res.render('try-post-form',req.body);
+    
+    //urlencodedParser
 
     // res.send(JSON.stringify(req.body))
 })
@@ -187,6 +209,9 @@ app.use('/123',require(__dirname +'/admins/admin3'));
 
 app.use('/admin3-1', require(__dirname + '/admins/admin3-1') );
 
+/////////////////////////////模組化(資料庫demo)10/01
+app.use('/address_book-ski',require(__dirname + '/address_book-ski.js'));
+
 
 /////////////////////////////顯示刷新頁面次數express-session
 app.get('/try-session', (req, res)=>{
@@ -259,7 +284,7 @@ app.get('/test_ski_try_db2/:page?',(req,res)=>{
 });
 
 /////////////////////////////9/27資料庫連線，cookies和session使用whitelist(白名單)，準備後端服務。
-app.get('/test_session2',(req,res)=>{
+app.get('/try_session2',(req,res)=>{
     req.session.views = req.session.views || 0;
     req.session.views ++;
     res.json({
